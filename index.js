@@ -5,7 +5,7 @@ import { loadAndProcessDocuments } from "./documentProcessor.js";
 
 dotenv.config();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const { OPENAI_API_KEY } = process.env;
 
 async function main() {
   const model = new OpenAI({
