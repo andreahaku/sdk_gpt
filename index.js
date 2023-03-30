@@ -2,17 +2,19 @@ import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
 import dotenv from "dotenv";
 import { loadAndProcessDocuments } from "./documentProcessor.js";
+import readline from "readline";
 
 dotenv.config();
 
 const { OPENAI_API_KEY } = process.env;
 
 async function main() {
-  const model = new OpenAI({
-    openAIApiKey: OPENAI_API_KEY,
-    temperature: 0.9,
-    maxTokens: 2500,
-  });
+  try {
+    const model = new OpenAI({
+      openAIApiKey: OPENAI_API_KEY,
+      temperature: 0.9,
+      maxTokens: 2500,
+    });
 
   let vectorStore;
   try {
@@ -57,4 +59,4 @@ async function main() {
   }
 }
 
-main().catch((error) => console.error(error));
+main();
