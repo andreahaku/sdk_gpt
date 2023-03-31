@@ -16,7 +16,7 @@ async function main() {
 
   let vectorStore;
   try {
-    vectorStore = await loadAndProcessDocuments("sdk_docs/");
+    vectorStore = await loadAndProcessDocuments("metamask_docs/");
   } catch (error) {
     console.error(`Error loading and processing documents: ${error.message}`);
     return;

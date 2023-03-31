@@ -9,6 +9,8 @@ export async function loadAndProcessDocuments(directoryPath) {
   try {
     const directoryLoader = new DirectoryLoader(directoryPath, {
       ".md": (path) => new TextLoader(path),
+      ".js": (path) => new TextLoader(path),
+      ".ts": (path) => new TextLoader(path),
     });
 
     const documentLoaders = await directoryLoader.load();
@@ -18,7 +20,7 @@ export async function loadAndProcessDocuments(directoryPath) {
     const splitDocuments = async (documentLoader) => {
       const text = documentLoader.pageContent;
       const documents = await markdownSplitter.createDocuments([text], {
-        metadata: "metamask_sdk_documentation",
+        metadata: "metamask_docs",
       });
       allDocuments.push(...documents);
     };
