@@ -19,7 +19,7 @@ async function main() {
       maxTokens: 2500,
     });
 
-    const vectorStore = await loadAndProcessDocuments("sdk_docs/");
+    const vectorStore = await loadAndProcessDocuments("zendesk_kb/");
 
     // Cache the vectorStore
     const retriever = vectorStore.asRetriever();

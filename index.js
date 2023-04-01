@@ -5,7 +5,7 @@ import { loadAndProcessDocuments } from "./documentProcessor.js";
 
 dotenv.config();
 
-const { OPENAI_API_KEY } = process.env;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 async function main() {
   const model = new OpenAI({
@@ -16,7 +16,7 @@ async function main() {
 
   let vectorStore;
   try {
-    vectorStore = await loadAndProcessDocuments("sdk_docs/");
+    vectorStore = await loadAndProcessDocuments("metamask_docs/");
   } catch (error) {
     console.error(`Error loading and processing documents: ${error.message}`);
     return;
