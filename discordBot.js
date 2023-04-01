@@ -6,8 +6,7 @@ import { ConversationalRetrievalQAChain } from "langchain/chains";
 
 dotenv.config();
 
-const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const { DISCORD_BOT_TOKEN, OPENAI_API_KEY } = process.env;
 
 async function setup() {
   const model = new OpenAI({
@@ -35,19 +34,63 @@ const client = new Client({
   ],
 });
 
+// Use a Map object to store chat history for each user
+const chatHistory = new Map();
+
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
 client.on("messageCreate", async (message) => {
-  if (message.author.bot || !message.content.startsWith("!askMM ")) return;
+  if (message.author.bot) return;
 
-  const question = message.content.slice(7).trim();
-  const chain = await chainPromise;
-  const response = await chain.call({ question, chat_history: [] });
-  const answer = response.text.trim();
+  const content = message.content.trim();
 
-  message.reply(answer);
+  // Use switch statement to handle different commands
+  switch (content) {
+    case "!help":
+      message.reply(
+        "Type !askMM <your question> to ask a question about the MetaMask SDK."
+      );
+      break;
+
+    case "!about":
+      message.reply(
+        "I'm a bot that can answer questions about the MetaMask SDK."
+      );
+      break;
+
+    default:
+      if (!content.startsWith("!askMM ")) return;
+
+      const question = content.slice(7).trim();
+      const authorId = message.author.id;
+
+      try {
+        // Get the chat history for this user
+        const userChatHistory = chatHistory.get(authorId) || [];
+
+        const chain = await chainPromise;
+        const response = await chain.call({
+          question,
+          chat_history: userChatHistory,
+        });
+        const answer = response.text.trim();
+
+        // Add the question+answer string to the user's chat history
+        chatHistory.set(authorId, [
+          ...userChatHistory,
+          `${question} ${answer}`,
+        ]);
+
+        message.reply(answer);
+      } catch (error) {
+        console.error(error);
+        message.reply(
+          "Oops! Something went wrong. Please try again later or contact the bot developer."
+        );
+      }
+  }
 });
 
 client.login(DISCORD_BOT_TOKEN);

@@ -1,5 +1,3 @@
-// main.js
-
 import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
 import dotenv from "dotenv";
@@ -7,7 +5,7 @@ import { loadAndProcessDocuments } from "./documentProcessor.js";
 
 dotenv.config();
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const { OPENAI_API_KEY } = process.env;
 
 async function main() {
   const model = new OpenAI({
@@ -16,23 +14,25 @@ async function main() {
     maxTokens: 2500,
   });
 
-  const vectorStore = await loadAndProcessDocuments("sdk_docs/");
-  const chain = ConversationalRetrievalQAChain.fromLLM(
-    model,
-    vectorStore.asRetriever()
-  );
+  let vectorStore;
+  try {
+    vectorStore = await loadAndProcessDocuments("sdk_docs/");
+  } catch (error) {
+    console.error(`Error loading and processing documents: ${error.message}`);
+    return;
+  }
 
-  // TODO: cache the `vectorStore` after processing the documents, so we don't have to redo the document loading and processing each time you ask questions.
+  const retriever = vectorStore.asRetriever();
+  const chain = ConversationalRetrievalQAChain.fromLLM(model, retriever);
 
-  /* Ask it questions */
   const questions = [
     "How can I install MetaMask SDK on iOS?",
     "Where can I get support?",
     "What about React Native?",
-    "Which platform does the Unity SDK supports?",
+    "Which platform does the Unity SDK support?",
     "Which dependencies does the Unity SDK have?",
     "Is there a Discord server?",
-    "What are the plans for the future develoment?",
+    "What are the plans for future development?",
     "What is the MetaMask SDK?",
     "How do you import the MetaMask SDK?",
     "How can users connect the MetaMask SDK to their wallet?",
@@ -45,13 +45,15 @@ async function main() {
     "How can you view a NodeJS app example of the MetaMask SDK?",
   ];
 
+  const chatHistory = [];
+
   for (const question of questions) {
-    const res = await chain.call({ question, chat_history: [] });
+    const res = await chain.call({ question, chat_history: chatHistory });
     const answer = res.text.trim();
+    chatHistory.push(`${question} ${answer}`);
 
     console.log(`Q: ${question}`);
-    console.log(`A: ${answer}`);
-    console.log("\n\n");
+    console.log(`A: ${answer}\n`);
   }
 }
 
