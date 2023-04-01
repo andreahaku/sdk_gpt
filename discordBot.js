@@ -15,7 +15,7 @@ async function setup() {
     maxTokens: 2500,
   });
 
-  const vectorStore = await loadAndProcessDocuments("metamask_docs/");
+  const vectorStore = await loadAndProcessDocuments("zendesk_kb/");
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
     vectorStore.asRetriever()
