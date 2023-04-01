@@ -1,25 +1,12 @@
-// main.js
-
-import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
-import dotenv from "dotenv";
 import { loadAndProcessDocuments } from "./documentProcessor.js";
 import readline from "readline";
 import util from "util";
-
-dotenv.config();
-
-const { OPENAI_API_KEY } = process.env;
+import { model } from "./openAI_model.js";
 
 async function main() {
   try {
-    const model = new OpenAI({
-      openAIApiKey: OPENAI_API_KEY,
-      temperature: 0.9,
-      maxTokens: 2500,
-    });
-
-    const vectorStore = await loadAndProcessDocuments("zendesk_kb/");
+    const vectorStore = await loadAndProcessDocuments("metamask_zendesk_kb/");
 
     // Cache the vectorStore
     const retriever = vectorStore.asRetriever();

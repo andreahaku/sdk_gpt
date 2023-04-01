@@ -1,21 +1,15 @@
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
 import { loadAndProcessDocuments } from "./documentProcessor.js";
-import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
+import { model } from "./openAI_model.js";
 
 dotenv.config();
 
-const { DISCORD_BOT_TOKEN, OPENAI_API_KEY } = process.env;
+const { DISCORD_BOT_TOKEN } = process.env;
 
 async function setup() {
-  const model = new OpenAI({
-    openAIApiKey: OPENAI_API_KEY,
-    temperature: 0.9,
-    maxTokens: 2500,
-  });
-
-  const vectorStore = await loadAndProcessDocuments("zendesk_kb/");
+  const vectorStore = await loadAndProcessDocuments("metamask_zendesk_kb/");
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
     vectorStore.asRetriever()

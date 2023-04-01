@@ -1,25 +1,14 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
-import dotenv from "dotenv";
 import { loadAndProcessDocuments } from "./documentProcessor.js";
-
-dotenv.config();
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+import { model } from "./openAI_model.js";
 
 const app = express();
 app.use(bodyParser.json());
 
 async function setup() {
-  const model = new OpenAI({
-    openAIApiKey: OPENAI_API_KEY,
-    temperature: 0.9,
-    maxTokens: 2500,
-  });
-
-  const vectorStore = await loadAndProcessDocuments("metamask_docs/");
+  const vectorStore = await loadAndProcessDocuments("metamask_dev_docs/");
   const chain = ConversationalRetrievalQAChain.fromLLM(
     model,
     vectorStore.asRetriever()

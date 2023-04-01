@@ -1,5 +1,3 @@
-// documentProcessor.js
-
 import { DirectoryLoader, TextLoader } from "langchain/document_loaders";
 import { MarkdownTextSplitter } from "langchain/text_splitter";
 import { HNSWLib } from "langchain/vectorstores";
@@ -20,7 +18,7 @@ export async function loadAndProcessDocuments(directoryPath) {
     const splitDocuments = async (documentLoader) => {
       const text = documentLoader.pageContent;
       const documents = await markdownSplitter.createDocuments([text], {
-        metadata: "metamask_docs",
+        metadata: directoryPath,
       });
       allDocuments.push(...documents);
     };

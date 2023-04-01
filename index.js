@@ -1,22 +1,11 @@
-import { OpenAI } from "langchain/llms";
 import { ConversationalRetrievalQAChain } from "langchain/chains";
-import dotenv from "dotenv";
 import { loadAndProcessDocuments } from "./documentProcessor.js";
-
-dotenv.config();
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+import { model } from "./openAI_model.js";
 
 async function main() {
-  const model = new OpenAI({
-    openAIApiKey: OPENAI_API_KEY,
-    temperature: 0.9,
-    maxTokens: 2500,
-  });
-
   let vectorStore;
   try {
-    vectorStore = await loadAndProcessDocuments("metamask_docs/");
+    vectorStore = await loadAndProcessDocuments("metamask_dev_docs/");
   } catch (error) {
     console.error(`Error loading and processing documents: ${error.message}`);
     return;
