@@ -1,6 +1,6 @@
-# Language Model Document Retriever (MetaMask SDK Docs test)
+# Language Model Document Retriever (MetaMask developers and Zendesk knowledge base tests)
 
-This repository contains a Node.js application that uses OpenAI's GPT-4-based model to answer questions related to a set of documents. Specifically the MetaMask SDK documentation.
+This repository contains a Node.js application that uses OpenAI's GPT-3.5 and GPT-4 based model to answer questions related to a set of documents. Specifically the MetaMask SDK documentation.
 
 The application first processes the documents, creating a vector store for efficient retrieval, and then provides an interactive prompt for users to ask questions.
 
@@ -9,8 +9,10 @@ The application first processes the documents, creating a vector store for effic
 - Load and process documents from a specified directory.
 - Split documents into chunks using Markdown text splitter.
 - Create a vector store for efficient document retrieval.
-- Use OpenAI's GPT-4-based model to answer questions.
+- Use OpenAI's GPT-3.5/4 based model to answer questions.
 - Provide an interactive prompt for users to ask questions.
+- Provide an REST API.
+- Provide an Discord bot.
 
 ## Prerequisites
 
