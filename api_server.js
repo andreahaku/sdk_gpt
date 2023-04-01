@@ -1,23 +1,12 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { ConversationalRetrievalQAChain } from "langchain/chains";
-import { loadAndProcessDocuments } from "./documentProcessor.js";
 import { model } from "./openAI_model.js";
+import { llmSetup } from "./llm_setup.js";
 
 const app = express();
 app.use(bodyParser.json());
 
-async function setup() {
-  const vectorStore = await loadAndProcessDocuments("metamask_dev_docs/");
-  const chain = ConversationalRetrievalQAChain.fromLLM(
-    model,
-    vectorStore.asRetriever()
-  );
-
-  return chain;
-}
-
-const chainPromise = setup();
+const chainPromise = llmSetup("metamask_dev_docs/");
 
 app.post("/ask", async (req, res) => {
   try {

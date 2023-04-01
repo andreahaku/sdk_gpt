@@ -7,8 +7,8 @@
   "scripts": {
     "start": "node index.js",
     "start:interactive": "node index_interactive.js",
-    "start:server": "node app.js",
-    "start:discordBot": "node discordBot.js",
+    "start:server": "node api_server.js",
+    "start:discord": "node discord_bot.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

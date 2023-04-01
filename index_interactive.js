@@ -1,17 +1,11 @@
-import { ConversationalRetrievalQAChain } from "langchain/chains";
-import { loadAndProcessDocuments } from "./documentProcessor.js";
 import readline from "readline";
 import util from "util";
 import { model } from "./openAI_model.js";
+import { llmSetup } from "./llm_setup.js";
 
 async function main() {
   try {
-    const vectorStore = await loadAndProcessDocuments("metamask_zendesk_kb/");
-
-    // Cache the vectorStore
-    const retriever = vectorStore.asRetriever();
-
-    const chain = ConversationalRetrievalQAChain.fromLLM(model, retriever);
+    const chain = await llmSetup("metamask_zendesk_kb/");
 
     const rl = readline.createInterface({
       input: process.stdin,

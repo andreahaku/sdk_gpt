@@ -1,18 +1,8 @@
-import { ConversationalRetrievalQAChain } from "langchain/chains";
-import { loadAndProcessDocuments } from "./documentProcessor.js";
 import { model } from "./openAI_model.js";
+import { llmSetup } from "./llm_setup.js";
 
 async function main() {
-  let vectorStore;
-  try {
-    vectorStore = await loadAndProcessDocuments("metamask_dev_docs/");
-  } catch (error) {
-    console.error(`Error loading and processing documents: ${error.message}`);
-    return;
-  }
-
-  const retriever = vectorStore.asRetriever();
-  const chain = ConversationalRetrievalQAChain.fromLLM(model, retriever);
+  const chain = llmSetup("metamask_dev_docs/");
 
   const questions = [
     "How can I install MetaMask SDK on iOS?",

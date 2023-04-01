@@ -1,24 +1,13 @@
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
-import { loadAndProcessDocuments } from "./documentProcessor.js";
-import { ConversationalRetrievalQAChain } from "langchain/chains";
 import { model } from "./openAI_model.js";
+import { llmSetup } from "./llm_setup.js";
 
 dotenv.config();
 
 const { DISCORD_BOT_TOKEN } = process.env;
 
-async function setup() {
-  const vectorStore = await loadAndProcessDocuments("metamask_zendesk_kb/");
-  const chain = ConversationalRetrievalQAChain.fromLLM(
-    model,
-    vectorStore.asRetriever()
-  );
-
-  return chain;
-}
-
-const chainPromise = setup();
+const chainPromise = llmSetup("metamask_zendesk_kb/");
 
 const client = new Client({
   intents: [
