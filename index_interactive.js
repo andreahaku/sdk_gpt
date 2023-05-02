@@ -2,6 +2,7 @@ import readline from "readline";
 import util from "util";
 import { model } from "./openAI_model.js";
 import { llmSetup } from "./llm_setup.js";
+import colors from "colors";
 
 async function main() {
   try {
@@ -34,8 +35,8 @@ async function main() {
       const answer = res.text.trim();
       chatHistory.push(`${userQuestion} ${answer}`);
 
-      console.log(`\nQ: ${userQuestion}`);
-      console.log(`A: ${answer}\n\n`);
+      console.log(colors.bold.green(`\nQ: ${userQuestion}`));
+      console.log(colors.brightWhite(`A: ${answer}\n\n`));
     }
 
     rl.close();

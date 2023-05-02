@@ -1,16 +1,10 @@
 import { llmSetup } from "./llm_setup.js";
+import colors from "colors";
 
 async function main() {
   const chain = await llmSetup("metamask_dev_docs/");
 
   const questions = [
-    "How can I install MetaMask SDK on iOS?",
-    "Where can I get support?",
-    "What about React Native?",
-    "Which platform does the Unity SDK support?",
-    "Which dependencies does the Unity SDK have?",
-    "Is there a Discord server?",
-    "What are the plans for future development?",
     "What is the MetaMask SDK?",
     "How do you import the MetaMask SDK?",
     "How can users connect the MetaMask SDK to their wallet?",
@@ -26,12 +20,15 @@ async function main() {
   const chatHistory = [];
 
   for (const question of questions) {
-    const res = await chain.call({ question, chat_history: chatHistory });
+    const res = await chain.call({
+      question,
+      chat_history: chatHistory,
+    });
     const answer = res.text.trim();
     chatHistory.push(`${question} ${answer}`);
 
-    console.log(`Q: ${question}`);
-    console.log(`A: ${answer}\n`);
+    console.log(colors.bold.green(`Q: ${question}`));
+    console.log(colors.brightWhite(`A: ${answer}\n`));
   }
 }
 
