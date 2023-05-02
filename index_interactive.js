@@ -34,7 +34,7 @@ async function main() {
       const answer = res.text.trim();
       chatHistory.push(`${userQuestion} ${answer}`);
 
-      console.log(`Q: ${userQuestion}`);
+      console.log(`\nQ: ${userQuestion}`);
       console.log(`A: ${answer}\n\n`);
     }
 

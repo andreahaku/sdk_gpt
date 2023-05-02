@@ -7,7 +7,7 @@ dotenv.config();
 
 const { DISCORD_BOT_TOKEN } = process.env;
 
-const chainPromise = llmSetup("metamask_zendesk_kb/");
+const chainPromise = await llmSetup("metamask_zendesk_kb/");
 
 const client = new Client({
   intents: [

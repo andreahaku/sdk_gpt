@@ -1,8 +1,7 @@
-import { model } from "./openAI_model.js";
 import { llmSetup } from "./llm_setup.js";
 
 async function main() {
-  const chain = llmSetup("metamask_dev_docs/");
+  const chain = await llmSetup("metamask_dev_docs/");
 
   const questions = [
     "How can I install MetaMask SDK on iOS?",

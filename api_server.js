@@ -6,7 +6,7 @@ import { llmSetup } from "./llm_setup.js";
 const app = express();
 app.use(bodyParser.json());
 
-const chainPromise = llmSetup("metamask_dev_docs/");
+const chainPromise = await llmSetup("metamask_dev_docs/");
 
 app.post("/ask", async (req, res) => {
   try {
