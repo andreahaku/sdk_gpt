@@ -131,7 +131,7 @@ docker build -t sdk_gpt:1.0 .
 You can run the Docker image on your local machine with the docker run command. H
 
 ```bash
-docker run -e OPENAI_API_KEY="xxxxxx" -p 3000:3000 chatbot:1.0
+docker run -e OPENAI_API_KEY="xxxxxx" -p 3000:3000 sdk_gpt:1.0
 ```
 
 In this command, -p 3000:3000 maps port 3000 in the Docker container to port 3000 on your local machine and -e OPENAI_API_KEY="xxxxxx" sets the OPENAI_API_KEY environment variable in the container to your OpenAI API key.
