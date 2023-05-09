@@ -128,8 +128,6 @@ docker build -t sdk_gpt:1.0 .
 
 3. Running the Docker Image Locally
 
-You can run the Docker image on your local machine with the docker run command. H
-
 ```bash
 docker run -e OPENAI_API_KEY="xxxxxx" -p 3000:3000 sdk_gpt:1.0
 ```
