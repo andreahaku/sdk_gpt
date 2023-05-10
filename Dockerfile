@@ -33,6 +33,8 @@ EXPOSE 3000
 # Add arguments to the Docker image
 ARG OPENAI_API_KEY
 ARG DISCORD_BOT_TOKEN
+ARG PINECONE_API_KEY
+ARG PINECONE_ENVIRONMENT
 
 # Start the application
 CMD [ "yarn", "start:server" ]

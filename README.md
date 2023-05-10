@@ -129,7 +129,7 @@ docker build -t sdk_gpt:1.0 .
 3. Running the Docker Image Locally
 
 ```bash
-docker run -e OPENAI_API_KEY="xxxxxx" -p 3000:3000 sdk_gpt:1.0
+docker run -e OPENAI_API_KEY="xxxxxx" -e PINECONE_ENVIRONMENT="input-region" -e PINECONE_API_KEY="xxxxxx" -p 3000:3000 sdk_gpt:1.0
 ```
 
 In this command, -p 3000:3000 maps port 3000 in the Docker container to port 3000 on your local machine and -e OPENAI_API_KEY="xxxxxx" sets the OPENAI_API_KEY environment variable in the container to your OpenAI API key.
