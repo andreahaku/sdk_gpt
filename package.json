@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pinecone-database/pinecone": "^0.0.10",
     "body-parser": "^1.20.2",
     "colors": "^1.4.0",
     "discord.js": "^14.8.0",
