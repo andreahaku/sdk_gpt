@@ -1,12 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { model } from "./openAI_model.js";
-import { llmSetup } from "./llm_setup.js";
+import {getPreloadedLLMSetup} from "./llm_setup.js";
 
 const app = express();
 app.use(bodyParser.json());
 
-const chainPromise = await llmSetup("metamask_dev_docs/");
+const chainPromise = await getPreloadedLLMSetup();
 
 app.post("/ask", async (req, res) => {
   try {
