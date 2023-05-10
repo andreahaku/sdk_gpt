@@ -109,30 +109,34 @@ that sends an answer similar to:
      https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=3072
      ```
 
-## Building the Docker Image
+## Running the Docker Image from GitHub Packages
 
-Clone the repository to your local machine:
+This repository uses GitHub Actions to automatically build and push Docker images to GitHub Packages upon every push to the `main` or `hackathon` branch. You can use these images to run the application without having to set up a local development environment.
 
-1. Clone the repository:
+### Prerequisites
 
-```bash
-git clone https://github.com/andreahaku/sdk_gpt.git
-cd sdk_gpt
-```
+- Docker
 
-2. Build the Docker image:
+### Setup
 
-```bash
-docker build -t sdk_gpt:1.0 .
-```
-
-3. Running the Docker Image Locally
+1. Pull the Docker image from GitHub Packages:
 
 ```bash
-docker run -e OPENAI_API_KEY="xxxxxx" -e PINECONE_ENVIRONMENT="input-region" -e PINECONE_API_KEY="xxxxxx" -p 3000:3000 sdk_gpt:1.0
+docker pull ghcr.io/andreahaku/sdk_gpt:hackathon
 ```
 
-In this command, -p 3000:3000 maps port 3000 in the Docker container to port 3000 on your local machine and -e OPENAI_API_KEY="xxxxxx" sets the OPENAI_API_KEY environment variable in the container to your OpenAI API key.
+2. Create a .env file your environment variables:
+
+```bash
+OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+DISCORD_BOT_TOKEN=xxxxxxx
+```
+
+3. Run the Docker image:
+
+```bash
+docker run --env-file .env -p 3000:3000 ghcr.io/andreahaku/sdk_gpt:hackathon
+```
 
 ## License
 

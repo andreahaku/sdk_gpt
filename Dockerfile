@@ -11,7 +11,7 @@ RUN apk add --no-cache --update python3 make g++
 COPY package*.json yarn.lock ./
 
 # Install dependencies in the Docker container
-RUN yarn
+RUN yarn --production --frozen-lockfile && yarn cache clean
 
 # Copy the rest of the project to the working directory
 COPY . .
@@ -22,7 +22,7 @@ FROM node:18-alpine
 # Set the working directory in the Docker container
 WORKDIR /usr/src/app
 
-# Copy only the built artifacts and the necessary files to run the app from the build image
+# Copy only the necessary files to run the app from the build image
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package.json ./package.json
 COPY --from=build /usr/src/app ./
