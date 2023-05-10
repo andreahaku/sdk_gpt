@@ -109,7 +109,7 @@ that sends an answer similar to:
      https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&scope=bot&permissions=3072
      ```
 
-## Running the Docker Image from GitHub Packages
+## Running the Docker Image
 
 This repository uses GitHub Actions to automatically build and push Docker images to GitHub Packages upon every push to the `main` or `hackathon` branch. You can use these images to run the application without having to set up a local development environment.
 
@@ -125,17 +125,30 @@ This repository uses GitHub Actions to automatically build and push Docker image
 docker pull ghcr.io/andreahaku/sdk_gpt:hackathon
 ```
 
-2. Create a .env file your environment variables:
+2. Create a .env file with your environment variables:
 
 ```bash
 OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 DISCORD_BOT_TOKEN=xxxxxxx
+PINECONE_ENVIRONMENT=some-region
+PINECONE_API_KEY=xxxxxxx
 ```
 
 3. Run the Docker image:
 
 ```bash
 docker run --env-file .env -p 3000:3000 ghcr.io/andreahaku/sdk_gpt:hackathon
+```
+
+4. The application will be available at <http://localhost:3000>. Here's an example of how to send a request to the API using curl:
+
+```
+curl --request POST \
+  --url http://localhost:3000/ask \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "question": "How can I install MetaMask SDK on iOS?"
+  }'
 ```
 
 ## License
