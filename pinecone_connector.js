@@ -1,6 +1,6 @@
 import { PineconeClient } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "langchain/embeddings";
-import {loadAndProcessDocuments, splitDocuments} from "./document_processor.js";
+import { splitDocuments} from "./document_processor.js";
 import {PineconeStore} from "langchain/vectorstores";
 
 const HACKATHON_INDEX = "hackathon";
@@ -21,7 +21,7 @@ export async function getPineconeClient() {
  * the vector DB and should be done only once.
  * @param directoryPath The path to the documents
  */
-export default async function initialLoadOfPineconeDb(directoryPath) {
+export async function initialLoadOfPineconeDb(directoryPath) {
   const allDocuments = await splitDocuments(directoryPath);
   const embeddings = new OpenAIEmbeddings({openAIApiKey: OPENAI_API_KEY});
 
@@ -36,11 +36,13 @@ export default async function initialLoadOfPineconeDb(directoryPath) {
   }
 }
 
-const sliceIntoChunks = (vectorArray, chunkSize) => {
-    const res = [];
-    for (let i = 0; i < vectorArray.length; i += chunkSize) {
-        const chunk = vectorArray.slice(i, i + chunkSize);
-        res.push(chunk);
-    }
-    return res;
-};
+export async function getVectorStoreFromPinecone() {
+    const client = await getPineconeClient();
+    const pineconeIndex = client.Index(HACKATHON_INDEX);
+
+    return await PineconeStore.fromExistingIndex(
+        new OpenAIEmbeddings(),
+        { pineconeIndex }
+    );
+}
+
