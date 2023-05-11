@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  server-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - '3000:3000'
+    container_name: server-api
+    restart: unless-stopped
+
+  server-discord:
+    build:
+      context: .
+      dockerfile: Dockerfile.discord
+    env_file:
+      - .env
+    container_name: server-discord
+    restart: unless-stopped
