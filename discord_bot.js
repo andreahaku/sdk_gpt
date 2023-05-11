@@ -19,9 +19,13 @@ const client = new Client({
 // Use a Map object to store chat history for each user
 const chatHistory = new Map();
 
-const sendMessage = (message) => {
+const sendMessage = (message, messageContent) => {
   try {
-    message.reply(message);
+    if (messageContent) {
+      message.channel.send(messageContent);
+    } else {
+      console.error(`No content generated as response for ${message.id}: ${message.content.trim()}} by author ${message.author}`)
+    }
   } catch (error) {
     console.log(error);
   }
@@ -41,12 +45,14 @@ client.on("messageCreate", async (message) => {
     switch (content) {
       case "!help":
         sendMessage(
+            message,
           "Type !askMM <your question> to ask a question about the MetaMask SDK."
         );
         break;
 
       case "!about":
         sendMessage(
+            message,
           "I'm a bot that can answer questions about the MetaMask SDK."
         );
         break;
@@ -74,10 +80,10 @@ client.on("messageCreate", async (message) => {
             `${question} ${answer}`,
           ]);
 
-          sendMessage(answer);
+          sendMessage(message, answer);
         } catch (error) {
           console.error(error);
-          sendMessage(
+          sendMessage(message,
             "Oops! Something went wrong. Please try again later or contact the bot developer."
           );
         }
