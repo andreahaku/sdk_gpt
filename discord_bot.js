@@ -87,4 +87,9 @@ client.on("messageCreate", async (message) => {
   }
 });
 
-client.login(DISCORD_BOT_TOKEN);
+try {
+  await client.login(DISCORD_BOT_TOKEN);
+
+} catch (e) {
+  console.log(e);
+}
