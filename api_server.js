@@ -1,11 +1,19 @@
 import express from "express";
 import bodyParser from "body-parser";
-import {getPreloadedLLMSetup} from "./llm_setup.js";
+import {getPreloadedLLMSetup, llmSetup} from "./llm_setup.js";
+import cors from "cors";
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors({
+  origin: '*',
+  methods: 'GET, POST, PUT, DELETE',
+  allowedHeaders: '*'
+}));
 
 const chainPromise = await getPreloadedLLMSetup();
+// const chainPromise = await llmSetup("metamask_dev_docs/");
+
 
 app.post("/ask", async (req, res) => {
   try {
