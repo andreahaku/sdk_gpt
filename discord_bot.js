@@ -19,6 +19,7 @@ const client = new Client({
 // Use a Map object to store chat history for each user
 const chatHistory = new Map();
 
+// Sends a message to the same channel where the message was sent to
 const sendMessage = (message, messageContent) => {
   try {
     if (messageContent) {
@@ -95,7 +96,6 @@ client.on("messageCreate", async (message) => {
 
 try {
   await client.login(DISCORD_BOT_TOKEN);
-
 } catch (e) {
-  console.log(e);
+  console.error(e);
 }
