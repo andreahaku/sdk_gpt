@@ -113,6 +113,12 @@ that sends an answer similar to:
 
 This repository uses GitHub Actions to automatically build and push Docker images to GitHub Packages upon every push to the `main` or `hackathon` branch. You can use these images to run the application without having to set up a local development environment.
 
+
+## Running both Docker Images 
+
+If you want to start both containers of the server and the discord you can use `docker-compose up -d` to start the two containers in detached mode.
+You will need an env file like in `.env.example`. The server is reachable at port 3000, CORS is disabled for all origins.
+
 ### Prerequisites
 
 - Docker
