@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import {getPreloadedLLMSetup, llmSetup} from "./llm_setup.js";
+import {getPreloadedLLMSetup} from "./llm_setup.js";
 import cors from "cors";
 
 const app = express();
@@ -12,8 +12,6 @@ app.use(cors({
 }));
 
 const chainPromise = await getPreloadedLLMSetup();
-// const chainPromise = await llmSetup("metamask_dev_docs/");
-
 
 app.post("/ask", async (req, res) => {
   try {
@@ -23,11 +21,12 @@ app.post("/ask", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const chain = await chainPromise;
-    const response = await chain.call({ question, chat_history: [] });
+    const response = await chainPromise.call({ question, chat_history: [] });
     const answer = response.text.trim();
+    const allSources = response.sourceDocuments.map(s => s.metadata?.source);
+    const sources = [...new Set(allSources)];
 
-    res.json({ question, answer });
+    res.json({ question, answer, sources });
   } catch (error) {
     console.error(error);
     res
