@@ -27,6 +27,9 @@ COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/package.json ./package.json
 COPY --from=build /usr/src/app ./
 
+# Install concurrently to run multiple commands in a single Docker container
+RUN yarn global add concurrently
+
 # Expose the port the app runs on
 EXPOSE 3000
 
@@ -37,7 +40,8 @@ ARG PINECONE_API_KEY
 ARG PINECONE_ENVIRONMENT
 
 # Start the application
-CMD [ "yarn", "start:server" ]
+CMD ["concurrently", "yarn start:server", "yarn start:discord"]
+
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=30s --start-period=30s --retries=3 \
