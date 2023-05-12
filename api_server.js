@@ -4,6 +4,9 @@ import {getPreloadedLLMSetup} from "./llm_setup.js";
 import cors from "cors";
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+const statusMessage = `Server is running on port ${PORT}`;
+
 app.use(bodyParser.json());
 app.use(cors({
   origin: '*',
@@ -35,8 +38,19 @@ app.post("/ask", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+app.get('/status', (req, res) => {
+  try {
+    res.status(200).send(statusMessage);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred');
+  }
+});
+
+
+
+
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(statusMessage);
 });
