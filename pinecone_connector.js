@@ -1,6 +1,6 @@
 import { PineconeClient } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "langchain/embeddings";
-import { splitDocuments} from "./document_processor.js";
+import {loadAndProcessDocuments, splitDocuments} from "./document_processor.js";
 import {PineconeStore} from "langchain/vectorstores";
 
 const HACKATHON_INDEX = "hackathon";
@@ -21,19 +21,29 @@ export async function getPineconeClient() {
  * the vector DB and should be done only once.
  * @param directoryPath The path to the documents
  */
-export async function initialLoadOfPineconeDb(directoryPath) {
-  const allDocuments = await splitDocuments(directoryPath);
-  const embeddings = new OpenAIEmbeddings({openAIApiKey: OPENAI_API_KEY});
+export default async function initialLoadOfPineconeDb(directoryPath) {
+  const allDocuments = await loadAndProcessDocuments(directoryPath);
 
   const pinecone = await getPineconeClient();
   const index = pinecone.Index(HACKATHON_INDEX);
 
   try {
-      await PineconeStore.fromDocuments(allDocuments, embeddings,
+      // Deletes all data in
+      await deleteAllVectorsFromPinecone(index);
+      const documents = Array.from(allDocuments.docstore._docs.values());
+
+      await PineconeStore.fromDocuments(documents, allDocuments.embeddings,
           {pineconeIndex: index, namespace: 'hackathon'});
   } catch (e) {
       console.log(`Error during loading embeddings into Pinecone: ${e}`);
   }
+}
+
+async function deleteAllVectorsFromPinecone(pineconeIndex) {
+    await pineconeIndex.delete1({
+        deleteAll: true,
+        namespace: HACKATHON_INDEX
+    })
 }
 
 export async function getVectorStoreFromPinecone() {
