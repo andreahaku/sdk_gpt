@@ -23,7 +23,6 @@ export async function getPineconeClient() {
  */
 export default async function initialLoadOfPineconeDb(directoryPath) {
   const allDocuments = await loadAndProcessDocuments(directoryPath);
-  // const embeddings = new OpenAIEmbeddings({openAIApiKey: OPENAI_API_KEY});
 
   const pinecone = await getPineconeClient();
   const index = pinecone.Index(HACKATHON_INDEX);
