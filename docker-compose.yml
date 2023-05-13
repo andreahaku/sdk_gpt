@@ -4,6 +4,8 @@ services:
   server-api:
     build:
       context: .
+    env_file:
+      - .env
     ports:
       - '3000:3000'
     container_name: server-api
@@ -12,5 +14,7 @@ services:
   server-discord:
     build:
       context: .
+    env_file:
+      - .env
     container_name: server-discord
     restart: unless-stopped

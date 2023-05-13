@@ -1,6 +1,6 @@
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
-import {getPreloadedLLMSetup} from "./llm_setup.js";
+import {getPreloadedLLMSetup, getPrompt} from "./llm_setup.js";
 
 dotenv.config();
 
@@ -69,9 +69,11 @@ client.on("messageCreate", async (message) => {
           const userChatHistory = chatHistory.get(authorId) || [];
 
           const chain = await chainPromise;
+          const prompt = getPrompt();
           const response = await chain.call({
             question,
             chat_history: userChatHistory,
+            prompt
           });
           const answer = response.text.trim();
 

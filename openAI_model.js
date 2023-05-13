@@ -13,6 +13,5 @@ export const model = new OpenAI({
   temperature: 0,
   maxTokens: 2500,
   verbose: true,
-
   // prompt:"" // This is the prompt that will be used for all calls to the model. You can add "personalities" here if you want to use them.
 });
