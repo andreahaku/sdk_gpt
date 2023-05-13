@@ -28,9 +28,11 @@ async function main() {
       }
 
       const res = await chain.call({
-        question: userQuestion,
+        question:
+          userQuestion +
+          "\n Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question I just asked.",
         chat_history: chatHistory,
-      });
+      });;
 
       const answer = res.text.trim();
       chatHistory.push(`${userQuestion} ${answer}`);
