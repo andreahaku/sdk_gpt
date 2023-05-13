@@ -27,7 +27,7 @@ export async function getPreloadedLLMSetup() {
 }
 
 export function getPrompt() {
-  const template = "You are a helpful assistant who tries to answer questions with code snippet examples. Please answer the following question and always provide code snippets when possible: {question}";
+  const template = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question I just asked. The question is: {question}";
 
   const prompt = new PromptTemplate({
     template: template,

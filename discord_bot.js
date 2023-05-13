@@ -68,12 +68,13 @@ client.on("messageCreate", async (message) => {
           // Get the chat history for this user
           const userChatHistory = chatHistory.get(authorId) || [];
 
+          const promptTemplate = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so.";
+          const msg = `${promptTemplate} \n ${question}`
+
           const chain = await chainPromise;
-          const prompt = getPrompt();
           const response = await chain.call({
-            question,
+            question: msg,
             chat_history: userChatHistory,
-            prompt
           });
           const answer = response.text.trim();
 
