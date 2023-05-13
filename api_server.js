@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import {getPreloadedLLMSetup} from "./llm_setup.js";
+import {getPreloadedLLMSetup, getPrompt} from "./llm_setup.js";
 import cors from "cors";
 
 const app = express();
@@ -24,7 +24,9 @@ app.post("/ask", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const response = await chainPromise.call({ question, chat_history: [] });
+    const prompt = getPrompt();
+
+    const response = await chainPromise.call({ question, chat_history: [], prompt });
     const answer = response.text.trim();
     const allSources = response.sourceDocuments.map(s => s.metadata?.source);
     const sources = [...new Set(allSources)];
@@ -46,10 +48,6 @@ app.get('/status', (req, res) => {
     res.status(500).send('An error occurred');
   }
 });
-
-
-
-
 
 app.listen(PORT, () => {
   console.log(statusMessage);

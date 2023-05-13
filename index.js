@@ -1,7 +1,5 @@
 import { llmSetup } from "./llm_setup.js";
 import colors from "colors";
-import initialLoadOfPineconeDb from "./pinecone_connector.js";
-import {getOrCreateHnswStore} from "./document_processor.js";
 
 async function main() {
   const chain = await llmSetup("metamask_dev_docs/");

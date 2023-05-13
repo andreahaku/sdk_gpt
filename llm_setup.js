@@ -1,9 +1,8 @@
-import {ConversationalRetrievalQAChain, RetrievalQAChain, VectorDBQAChain} from "langchain/chains";
+import {ConversationalRetrievalQAChain} from "langchain/chains";
 import {getOrCreateHnswStore, loadAndProcessDocuments} from "./document_processor.js";
 import { model } from "./openAI_model.js";
 import colors from "colors";
-import {getVectorStoreFromPinecone} from "./pinecone_connector.js";
-import {VectorStoreRetriever} from "langchain/dist/vectorstores/base.js";
+import {PromptTemplate} from "langchain/prompts";
 
 export async function llmSetup(directoryPath) {
   console.log(colors.red("Loading and processing documents..."));
@@ -23,6 +22,18 @@ export async function getPreloadedLLMSetup() {
   return ConversationalRetrievalQAChain.fromLLM(
       model,
       vectorStore.asRetriever(),
-      {returnSourceDocuments: true}
+      {returnSourceDocuments: true, }
   );
 }
+
+export function getPrompt() {
+  const template = "You are a helpful assistant who tries to answer questions with code snippet examples. Please answer the following question and always provide code snippets when possible: {question}";
+
+  const prompt = new PromptTemplate({
+    template: template,
+    inputVariables: ["question"],
+  })
+
+  return prompt;
+}
+
