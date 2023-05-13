@@ -9,9 +9,6 @@ import * as url from "url";
 const HNSWLIB_PATH = './hnsw_github_mm';
 const MMDOCS_PATH="metamask_dev_docs/";
 
-const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
-  "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
-]
 
 export async function loadAndProcessDocuments(directoryPath) {
   try {
@@ -31,7 +28,13 @@ export async function loadAndProcessDocuments(directoryPath) {
   }
 }
 
+// Coded this to work with the provided examples exactly. If other folder is used the nesting in readDocumentationFromMetamaskGithub needs to
+// be adjusted.
 export async function getOrCreateHnswStore() {
+  const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
+    "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
+  ]
+
   let vectorStore;
   if (fs.existsSync(HNSWLIB_PATH)) {
     // load docs from store if available
@@ -89,10 +92,12 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
 
   const splitDocuments = async (documentLoader, path) => {
     const text = documentLoader.pageContent;
-    // const name = ;
+    // specifically built for the use case of 2 main folders containing the markups. Needs to be configured
+    // individually for other projects.
     const nameArray = documentLoader.metadata.source.split('/');
     nameArray.shift();
-    const sourceURL = url + nameArray.join('/');
+    const joined = nameArray.join('/');
+    const sourceURL = `${path}${joined}`
 
     const documents = await markdownSplitter.createDocuments([text], [{
       source: sourceURL,
@@ -100,7 +105,7 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
     allDocuments.push(...documents);
   };
 
-  await Promise.all(documents.map(splitDocuments));
+  await Promise.all(documents.map(d => splitDocuments(d, inputUrl)));
 
   return allDocuments;
 
