@@ -24,9 +24,11 @@ app.post("/ask", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const prompt = getPrompt();
+    const promptTemplate = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so.";
 
-    const response = await chainPromise.call({ question, chat_history: [], prompt });
+    const msg = `${promptTemplate} \n ${question}`
+
+    const response = await chainPromise.call({ question: msg, chat_history: [], });
     const answer = response.text.trim();
     const allSources = response.sourceDocuments.map(s => s.metadata?.source);
     const sources = [...new Set(allSources)];
