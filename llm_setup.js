@@ -3,6 +3,7 @@ import {getOrCreateHnswStore, loadAndProcessDocuments} from "./document_processo
 import { model } from "./openAI_model.js";
 import colors from "colors";
 import {getVectorStoreFromPinecone} from "./pinecone_connector.js";
+import {VectorStoreRetriever} from "langchain/dist/vectorstores/base.js";
 
 export async function llmSetup(directoryPath) {
   console.log(colors.red("Loading and processing documents..."));
@@ -19,7 +20,6 @@ export async function llmSetup(directoryPath) {
 
 export async function getPreloadedLLMSetup() {
   const vectorStore = await getOrCreateHnswStore();
-
   return ConversationalRetrievalQAChain.fromLLM(
       model,
       vectorStore.asRetriever(),

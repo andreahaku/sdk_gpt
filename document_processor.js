@@ -1,10 +1,8 @@
-import {DirectoryLoader, GithubRepoLoader, PuppeteerWebBaseLoader, TextLoader} from "langchain/document_loaders";
-import {MarkdownTextSplitter, RecursiveCharacterTextSplitter} from "langchain/text_splitter";
+import {DirectoryLoader, GithubRepoLoader, TextLoader} from "langchain/document_loaders";
+import {MarkdownTextSplitter} from "langchain/text_splitter";
 import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
-import puppeteer from "puppeteer";
-import * as url from "url";
 
 const HNSWLIB_PATH = './hnsw_github_mm';
 const MMDOCS_PATH="metamask_dev_docs/";
@@ -31,54 +29,31 @@ export async function loadAndProcessDocuments(directoryPath) {
 // Coded this to work with the provided examples exactly. If other folder is used the nesting in readDocumentationFromMetamaskGithub needs to
 // be adjusted.
 export async function getOrCreateHnswStore() {
-  const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
-    "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
-  ]
-
   let vectorStore;
   if (fs.existsSync(HNSWLIB_PATH)) {
     // load docs from store if available
     vectorStore = await HNSWLib.load(HNSWLIB_PATH, new OpenAIEmbeddings());
   } else {
     // create the docs and store them for the first time
-    const allDocuments = [];
-    for (let i = 0; i < DOC_URLS.length; i++) {
-      const docs = await readDocumentationFromMetamaskGithub(DOC_URLS[i]);
-      allDocuments.push(...docs);
-    }
-    vectorStore = await HNSWLib.fromDocuments(allDocuments, new OpenAIEmbeddings());
+    vectorStore = await createHNSWStoreFromMMGithub()
+
     await vectorStore.save(HNSWLIB_PATH);
   }
 
   return vectorStore;
 }
 
-export async function splitHtmlDocuments() {
-  const loader = new PuppeteerWebBaseLoader('https://docs.metamask.io/wallet/', {
-    launchOptions: {
-
-      headless: true,
-
-    },
-    gotoOptions: {
-      waitUntil: "domcontentloaded",
-    },
-  });
-
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 400,
-    chunkOverlap: 50,
-    separators:["\n\n", "\n", " ", "" ]
-  });
-
-
-  const docs = await loader.loadAndSplit();
-
-  const a = 5;
-
+export async function createHNSWStoreFromMMGithub() {
+  const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
+    "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
+  ];
+  const allDocuments = [];
+  for (let i = 0; i < DOC_URLS.length; i++) {
+    const docs = await readDocumentationFromMetamaskGithub(DOC_URLS[i]);
+    allDocuments.push(...docs);
+  }
+  return await HNSWLib.fromDocuments(allDocuments, new OpenAIEmbeddings());
 }
-
-// Loads vector store from HNSWLIB from github repo
 
 export async function readDocumentationFromMetamaskGithub(inputUrl) {
 
@@ -108,8 +83,6 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
   await Promise.all(documents.map(d => splitDocuments(d, inputUrl)));
 
   return allDocuments;
-
-
 }
 
 export async function splitDocuments(directoryPath) {
