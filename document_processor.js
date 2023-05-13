@@ -1,11 +1,17 @@
-import { DirectoryLoader, TextLoader } from "langchain/document_loaders";
-import { MarkdownTextSplitter } from "langchain/text_splitter";
+import {DirectoryLoader, GithubRepoLoader, PuppeteerWebBaseLoader, TextLoader} from "langchain/document_loaders";
+import {MarkdownTextSplitter, RecursiveCharacterTextSplitter} from "langchain/text_splitter";
 import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
+import puppeteer from "puppeteer";
+import * as url from "url";
 
-const HNSWLIB_PATH = './hnswlibstore';
+const HNSWLIB_PATH = './hnsw_github_mm';
 const MMDOCS_PATH="metamask_dev_docs/";
+
+const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
+  "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
+]
 
 export async function loadAndProcessDocuments(directoryPath) {
   try {
@@ -32,11 +38,73 @@ export async function getOrCreateHnswStore() {
     vectorStore = await HNSWLib.load(HNSWLIB_PATH, new OpenAIEmbeddings());
   } else {
     // create the docs and store them for the first time
-    vectorStore = await loadAndProcessDocuments(MMDOCS_PATH);
+    const allDocuments = [];
+    for (let i = 0; i < DOC_URLS.length; i++) {
+      const docs = await readDocumentationFromMetamaskGithub(DOC_URLS[i]);
+      allDocuments.push(...docs);
+    }
+    vectorStore = await HNSWLib.fromDocuments(allDocuments, new OpenAIEmbeddings());
     await vectorStore.save(HNSWLIB_PATH);
   }
 
   return vectorStore;
+}
+
+export async function splitHtmlDocuments() {
+  const loader = new PuppeteerWebBaseLoader('https://docs.metamask.io/wallet/', {
+    launchOptions: {
+
+      headless: true,
+
+    },
+    gotoOptions: {
+      waitUntil: "domcontentloaded",
+    },
+  });
+
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 400,
+    chunkOverlap: 50,
+    separators:["\n\n", "\n", " ", "" ]
+  });
+
+
+  const docs = await loader.loadAndSplit();
+
+  const a = 5;
+
+}
+
+// Loads vector store from HNSWLIB from github repo
+
+export async function readDocumentationFromMetamaskGithub(inputUrl) {
+
+  const loader = new GithubRepoLoader(
+      inputUrl,
+      { branch: "main", recursive: true, unknown: "warn",  },
+  );
+  const allDocuments = [];
+  const markdownSplitter = new MarkdownTextSplitter();
+  const documents = await loader.load();
+
+  const splitDocuments = async (documentLoader, path) => {
+    const text = documentLoader.pageContent;
+    // const name = ;
+    const nameArray = documentLoader.metadata.source.split('/');
+    nameArray.shift();
+    const sourceURL = url + nameArray.join('/');
+
+    const documents = await markdownSplitter.createDocuments([text], [{
+      source: sourceURL,
+    }]);
+    allDocuments.push(...documents);
+  };
+
+  await Promise.all(documents.map(splitDocuments));
+
+  return allDocuments;
+
+
 }
 
 export async function splitDocuments(directoryPath) {
@@ -75,3 +143,6 @@ export async function splitDocuments(directoryPath) {
 
   return allDocuments;
 }
+
+
+
