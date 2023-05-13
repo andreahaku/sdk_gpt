@@ -1,11 +1,12 @@
-import { DirectoryLoader, TextLoader } from "langchain/document_loaders";
-import { MarkdownTextSplitter } from "langchain/text_splitter";
+import {DirectoryLoader, GithubRepoLoader, TextLoader} from "langchain/document_loaders";
+import {MarkdownTextSplitter} from "langchain/text_splitter";
 import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
 
-const HNSWLIB_PATH = './hnswlibstore';
+const HNSWLIB_PATH = './hnsw_github_mm';
 const MMDOCS_PATH="metamask_dev_docs/";
+
 
 export async function loadAndProcessDocuments(directoryPath) {
   try {
@@ -25,6 +26,8 @@ export async function loadAndProcessDocuments(directoryPath) {
   }
 }
 
+// Coded this to work with the provided examples exactly. If other folder is used the nesting in readDocumentationFromMetamaskGithub needs to
+// be adjusted.
 export async function getOrCreateHnswStore() {
   let vectorStore;
   if (fs.existsSync(HNSWLIB_PATH)) {
@@ -32,11 +35,54 @@ export async function getOrCreateHnswStore() {
     vectorStore = await HNSWLib.load(HNSWLIB_PATH, new OpenAIEmbeddings());
   } else {
     // create the docs and store them for the first time
-    vectorStore = await loadAndProcessDocuments(MMDOCS_PATH);
+    vectorStore = await createHNSWStoreFromMMGithub()
+
     await vectorStore.save(HNSWLIB_PATH);
   }
 
   return vectorStore;
+}
+
+export async function createHNSWStoreFromMMGithub() {
+  const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
+    "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
+  ];
+  const allDocuments = [];
+  for (let i = 0; i < DOC_URLS.length; i++) {
+    const docs = await readDocumentationFromMetamaskGithub(DOC_URLS[i]);
+    allDocuments.push(...docs);
+  }
+  return await HNSWLib.fromDocuments(allDocuments, new OpenAIEmbeddings());
+}
+
+export async function readDocumentationFromMetamaskGithub(inputUrl) {
+
+  const loader = new GithubRepoLoader(
+      inputUrl,
+      { branch: "main", recursive: true, unknown: "warn",  },
+  );
+  const allDocuments = [];
+  const markdownSplitter = new MarkdownTextSplitter();
+  const documents = await loader.load();
+
+  const splitDocuments = async (documentLoader, path) => {
+    const text = documentLoader.pageContent;
+    // specifically built for the use case of 2 main folders containing the markups. Needs to be configured
+    // individually for other projects.
+    const nameArray = documentLoader.metadata.source.split('/');
+    nameArray.shift();
+    const joined = nameArray.join('/');
+    const sourceURL = `${path}${joined}`
+
+    const documents = await markdownSplitter.createDocuments([text], [{
+      source: sourceURL,
+    }]);
+    allDocuments.push(...documents);
+  };
+
+  await Promise.all(documents.map(d => splitDocuments(d, inputUrl)));
+
+  return allDocuments;
 }
 
 export async function splitDocuments(directoryPath) {
@@ -75,3 +121,6 @@ export async function splitDocuments(directoryPath) {
 
   return allDocuments;
 }
+
+
+
