@@ -36,6 +36,7 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
@@ -59,7 +60,7 @@ client.on("messageCreate", async (message) => {
         break;
 
       default:
-        if (!content.startsWith("!askTEMP")) return;
+        if (!content.startsWith("!askMM")) return;
 
         const question = content.slice(7).trim();
         const authorId = message.author.id;
@@ -71,7 +72,7 @@ client.on("messageCreate", async (message) => {
           const userChatHistory = chatHistory.get(authorId) || [];
 
           // const promptTemplate = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so.";
-          const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following question if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible.";
+          const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following questions if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible.";
 
           const msg = `${promptTemplate} \n ${question}`
 
