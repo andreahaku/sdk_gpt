@@ -5,8 +5,8 @@ import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
 
 // const HNSWLIB_PATH = './hnsw_github_mm';
-// const HNSWLIB_PATH = './hnswlibstore';
-const HNSWLIB_PATH = './hnsw_local_github_mm';
+const HNSWLIB_PATH = './hnswlibstore';
+// const HNSWLIB_PATH = './hnsw_local_github_mm';
 
 const MMDOCS_PATH="metamask_dev_docs/";
 
