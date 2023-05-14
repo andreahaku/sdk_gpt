@@ -24,7 +24,7 @@ app.post("/ask", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const promptTemplate = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so.";
+    const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following question if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible.";
 
     const msg = `${promptTemplate} \n ${question}`
 

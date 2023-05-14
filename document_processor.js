@@ -4,8 +4,10 @@ import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
 
-const HNSWLIB_PATH = './hnsw_github_mm';
+// const HNSWLIB_PATH = './hnsw_github_mm';
 // const HNSWLIB_PATH = './hnswlibstore';
+const HNSWLIB_PATH = './hnsw_local_github_mm';
+
 const MMDOCS_PATH="metamask_dev_docs/";
 
 
@@ -36,7 +38,9 @@ export async function getOrCreateHnswStore() {
     vectorStore = await HNSWLib.load(HNSWLIB_PATH, new OpenAIEmbeddings());
   } else {
     // create the docs and store them for the first time
-    vectorStore = await createHNSWStoreFromMMGithub()
+    // vectorStore = await createHNSWStoreFromMMGithub();
+    vectorStore = await loadFromMMDocsHierarchical()
+
 
     await vectorStore.save(HNSWLIB_PATH);
   }
@@ -44,10 +48,20 @@ export async function getOrCreateHnswStore() {
   return vectorStore;
 }
 
+export async function loadFromMMDocsHierarchical() {
+  const location = "manual"
+
+  const docs = await splitDocuments(location);
+  return await HNSWLib.fromDocuments(docs, new OpenAIEmbeddings());
+
+}
+
 export async function createHNSWStoreFromMMGithub() {
   const DOC_URLS = ["https://github.com/MetaMask/metamask-docs/tree/main/snaps/",
     "https://github.com/MetaMask/metamask-docs/tree/main/wallet/"
   ];
+
+
   const allDocuments = [];
   for (let i = 0; i < DOC_URLS.length; i++) {
     const docs = await readDocumentationFromMetamaskGithub(DOC_URLS[i]);
@@ -63,10 +77,10 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
       { branch: "main", recursive: true, unknown: "warn",  },
   );
   const allDocuments = [];
-  const markdownSplitter = new MarkdownTextSplitter();
+  const markdownSplitter = new MarkdownTextSplitter({chunkSize: 600, chunkOverlap: 200});
   const documents = await loader.load();
 
-  const splitDocuments = async (documentLoader, path) => {
+  const splitDocumentsForGithub = async (documentLoader, path) => {
     const text = documentLoader.pageContent;
     // specifically built for the use case of 2 main folders containing the markups. Needs to be configured
     // individually for other projects.
@@ -81,7 +95,7 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
     allDocuments.push(...documents);
   };
 
-  await Promise.all(documents.map(d => splitDocuments(d, inputUrl)));
+  await Promise.all(documents.map(d => splitDocumentsForGithub(d, inputUrl)));
 
   return allDocuments;
 }
@@ -91,7 +105,7 @@ export async function splitDocuments(directoryPath) {
     ".md": (path) => new TextLoader(path),
     ".js": (path) => new TextLoader(path),
     ".ts": (path) => new TextLoader(path),
-  });
+  }, true);
 
   const documentLoaders = await directoryLoader.load();
   if (documentLoaders.length === 0) {
@@ -100,17 +114,14 @@ export async function splitDocuments(directoryPath) {
 
   const markdownSplitter = new MarkdownTextSplitter();
   const allDocuments = [];
+  const mainSource = "https://github.com/MetaMask/metamask-docs/tree/";
 
-  const splitDocuments = async (documentLoader) => {
+  const splitDocumentsWithLocalLoader = async (documentLoader) => {
     const text = documentLoader.pageContent;
 
     // use file name as context
-    const nameArray = documentLoader.metadata.source.split('/');
-    let documentName;
-    if (nameArray && nameArray.length > 1) {
-      // If we want to remove additional extensions they need to be included here
-      documentName = nameArray[nameArray.length - 1].replace(/\.(md|html|ts|js)$/, '');
-    }
+    const nameArray = documentLoader.metadata.source.split('/manual/');
+    let documentName = `${mainSource}${nameArray[1]}`;
 
     const documents = await markdownSplitter.createDocuments([text], [{
       source: documentName,
@@ -118,10 +129,27 @@ export async function splitDocuments(directoryPath) {
     allDocuments.push(...documents);
   };
 
-  await Promise.all(documentLoaders.map(splitDocuments));
+  await Promise.all(documentLoaders.map(splitDocumentsWithLocalLoader));
 
   return allDocuments;
 }
+
+const splitDocumentsWithGithubLoader = async (documentLoader, allDocuments) => {
+  const text = documentLoader.pageContent;
+
+  // use file name as context
+  const nameArray = documentLoader.metadata.source.split('/');
+  let documentName;
+  if (nameArray && nameArray.length > 1) {
+    // If we want to remove additional extensions they need to be included here
+    documentName = nameArray[nameArray.length - 1].replace(/\.(md|html|ts|js)$/, '');
+  }
+
+  const documents = await markdownSplitter.createDocuments([text], [{
+    source: documentName,
+  }]);
+  allDocuments.push(...documents);
+};
 
 
 

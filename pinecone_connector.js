@@ -1,6 +1,6 @@
 import { PineconeClient } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "langchain/embeddings";
-import {loadAndProcessDocuments, splitDocuments} from "./document_processor.js";
+import {loadAndProcessDocuments} from "./document_processor.js";
 import {PineconeStore} from "langchain/vectorstores";
 
 const HACKATHON_INDEX = "hackathon";
