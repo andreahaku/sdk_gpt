@@ -63,7 +63,7 @@ export async function readDocumentationFromMetamaskGithub(inputUrl) {
       { branch: "main", recursive: true, unknown: "warn",  },
   );
   const allDocuments = [];
-  const markdownSplitter = new MarkdownTextSplitter();
+  const markdownSplitter = new MarkdownTextSplitter({chunkSize: 600, chunkOverlap: 200});
   const documents = await loader.load();
 
   const splitDocuments = async (documentLoader, path) => {

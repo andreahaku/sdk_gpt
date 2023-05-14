@@ -59,10 +59,12 @@ client.on("messageCreate", async (message) => {
         break;
 
       default:
-        if (!content.startsWith("!askMM ")) return;
+        if (!content.startsWith("!askMM")) return;
 
         const question = content.slice(7).trim();
         const authorId = message.author.id;
+        let isTyping = true;
+        await sendMessageTyping(message, isTyping);
 
         try {
           // Get the chat history for this user
@@ -90,6 +92,8 @@ client.on("messageCreate", async (message) => {
           sendMessage(message,
             "Oops! Something went wrong. Please try again later or contact the bot developer."
           );
+        } finally {
+          isTyping = false;
         }
     }
   } catch (error) {
@@ -101,4 +105,11 @@ try {
   await client.login(DISCORD_BOT_TOKEN);
 } catch (e) {
   console.error(e);
+}
+
+async function sendMessageTyping(message, shouldType) {
+  if (shouldType) {
+    await message.channel.sendTyping();
+    setTimeout(() => sendMessageTyping(message, shouldType), 10000);
+  }
 }
