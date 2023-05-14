@@ -36,6 +36,7 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
+
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
@@ -59,7 +60,7 @@ client.on("messageCreate", async (message) => {
         break;
 
       default:
-        if (!content.startsWith("!askTEMP")) return;
+        if (!content.startsWith("!askMM")) return;
 
         const question = content.slice(7).trim();
         const authorId = message.author.id;
