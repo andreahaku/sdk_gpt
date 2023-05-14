@@ -116,9 +116,6 @@ export async function splitDocuments(directoryPath) {
   const allDocuments = [];
   const mainSource = "https://github.com/MetaMask/metamask-docs/tree/";
 
-  // {
-  //   "source": "/Users/aatanasov/Documents/sdk_gpt/manual/develop/docs/guide/README.md"
-  // }
   const splitDocumentsWithLocalLoader = async (documentLoader) => {
     const text = documentLoader.pageContent;
 
@@ -137,26 +134,22 @@ export async function splitDocuments(directoryPath) {
   return allDocuments;
 }
 
-const splitDocumentsWithLocalMMRepo = async (documentLoader) => {
+const splitDocumentsWithGithubLoader = async (documentLoader, allDocuments) => {
+  const text = documentLoader.pageContent;
 
-}
+  // use file name as context
+  const nameArray = documentLoader.metadata.source.split('/');
+  let documentName;
+  if (nameArray && nameArray.length > 1) {
+    // If we want to remove additional extensions they need to be included here
+    documentName = nameArray[nameArray.length - 1].replace(/\.(md|html|ts|js)$/, '');
+  }
 
-// const splitDocumentsWithGithubLoader = async (documentLoader, allDocuments) => {
-//   const text = documentLoader.pageContent;
-//
-//   // use file name as context
-//   const nameArray = documentLoader.metadata.source.split('/');
-//   let documentName;
-//   if (nameArray && nameArray.length > 1) {
-//     // If we want to remove additional extensions they need to be included here
-//     documentName = nameArray[nameArray.length - 1].replace(/\.(md|html|ts|js)$/, '');
-//   }
-//
-//   const documents = await markdownSplitter.createDocuments([text], [{
-//     source: documentName,
-//   }]);
-//   allDocuments.push(...documents);
-// };
+  const documents = await markdownSplitter.createDocuments([text], [{
+    source: documentName,
+  }]);
+  allDocuments.push(...documents);
+};
 
 
 
