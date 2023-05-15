@@ -1,5 +1,6 @@
 import { llmSetup } from "./llm_setup.js";
 import colors from "colors";
+import {getOrCreateHnswStore} from "./document_processor.js";
 
 async function main() {
   const chain = await llmSetup("metamask_dev_docs/");
@@ -31,5 +32,11 @@ async function main() {
     console.log(colors.brightWhite(`A: ${answer}\n`));
   }
 }
+
+// async function main() {
+//   console.log("Start");
+//   // const docs = await getOrCreateHnswStore();
+//   console.log("End");
+// }
 
 main().catch((error) => console.error(error));

@@ -1,12 +1,23 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { model } from "./openAI_model.js";
-import { llmSetup } from "./llm_setup.js";
+import {getPreloadedLLMSetup, getPrompt} from "./llm_setup.js";
+import cors from "cors";
+import {fakeMapFromManualFolder} from "./document_processor.js";
 
 const app = express();
-app.use(bodyParser.json());
+const PORT = process.env.PORT || 3000;
+const statusMessage = `Server is running on port ${PORT}`;
 
-const chainPromise = await llmSetup("metamask_dev_docs/");
+app.use(bodyParser.json());
+app.use(cors({
+  origin: '*',
+  methods: 'GET, POST, PUT, DELETE',
+  allowedHeaders: '*'
+}));
+
+const fileMapForSources = await fakeMapFromManualFolder();
+
+const chainPromise = await getPreloadedLLMSetup();
 
 app.post("/ask", async (req, res) => {
   try {
@@ -16,11 +27,24 @@ app.post("/ask", async (req, res) => {
       return res.status(400).json({ error: "Question is required" });
     }
 
-    const chain = await chainPromise;
-    const response = await chain.call({ question, chat_history: [] });
-    const answer = response.text.trim();
+    const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following questions if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible. Please respond using the very same language as the question I just asked.";
 
-    res.json({ question, answer });
+    const msg = `${promptTemplate} \n ${question}`
+
+    const response = await chainPromise.call({ question: msg, chat_history: [], });
+    const answer = response.text.trim();
+    const allSources = response.sourceDocuments.map(s => s.metadata?.source);
+    const sourcesSet = [...new Set(allSources)];
+    const references = [];
+    sourcesSet.map(keyword => {
+      if (fileMapForSources.has(keyword)) {
+        references.push(fileMapForSources.get(keyword));
+      } else {
+        console.error(`Could not find documentation for ${keyword}!`)
+      }
+    })
+
+    res.json({ question, answer, references });
   } catch (error) {
     console.error(error);
     res
@@ -29,8 +53,15 @@ app.post("/ask", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+app.get('/status', (req, res) => {
+  try {
+    res.status(200).send(statusMessage);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('An error occurred');
+  }
+});
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(statusMessage);
 });
