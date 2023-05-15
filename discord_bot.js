@@ -72,7 +72,7 @@ client.on("messageCreate", async (message) => {
           const userChatHistory = chatHistory.get(authorId) || [];
 
           // const promptTemplate = "You are an expert in MetaMask documentation. Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so.";
-          const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following questions if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible.";
+          const promptTemplate = "You are an expert in MetaMask documentation. Please answer the following questions if you know the answer give a precise and detailed answer. If you don't know the answer say that you don't know. Provide code snippets every time when possible. Please respond using the very same language as the question I just asked.";
 
           const msg = `${promptTemplate} \n ${question}`
 
