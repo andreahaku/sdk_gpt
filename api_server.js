@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import {getPreloadedLLMSetup, getPrompt} from "./llm_setup.js";
 import cors from "cors";
+import {fakeMapFromManualFolder} from "./document_processor.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +14,8 @@ app.use(cors({
   methods: 'GET, POST, PUT, DELETE',
   allowedHeaders: '*'
 }));
+
+const fileMapForSources = await fakeMapFromManualFolder();
 
 const chainPromise = await getPreloadedLLMSetup();
 
@@ -31,9 +34,17 @@ app.post("/ask", async (req, res) => {
     const response = await chainPromise.call({ question: msg, chat_history: [], });
     const answer = response.text.trim();
     const allSources = response.sourceDocuments.map(s => s.metadata?.source);
-    const sources = [...new Set(allSources)];
+    const sourcesSet = [...new Set(allSources)];
+    const references = [];
+    sourcesSet.map(keyword => {
+      if (fileMapForSources.has(keyword)) {
+        references.push(fileMapForSources.get(keyword));
+      } else {
+        console.error(`Could not find documentation for ${keyword}!`)
+      }
+    })
 
-    res.json({ question, answer, sources });
+    res.json({ question, answer, references });
   } catch (error) {
     console.error(error);
     res

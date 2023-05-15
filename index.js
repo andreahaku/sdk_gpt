@@ -35,8 +35,7 @@ async function main() {
 
 // async function main() {
 //   console.log("Start");
-//   const docs = await getOrCreateHnswStore();
-//
+//   // const docs = await getOrCreateHnswStore();
 //   console.log("End");
 // }
 
