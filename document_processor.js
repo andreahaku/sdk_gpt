@@ -3,12 +3,14 @@ import {MarkdownTextSplitter} from "langchain/text_splitter";
 import { HNSWLib } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import * as fs from "fs";
+import * as path from "path";
 
 // const HNSWLIB_PATH = './hnsw_github_mm';
 const HNSWLIB_PATH = './hnswlibstore';
 // const HNSWLIB_PATH = './hnsw_local_github_mm';
 
 const MMDOCS_PATH="metamask_dev_docs/";
+const MANUAL_PATH="./manual"
 
 
 export async function loadAndProcessDocuments(directoryPath) {
@@ -46,6 +48,65 @@ export async function getOrCreateHnswStore() {
   }
 
   return vectorStore;
+}
+
+export async function fakeMapFromManualFolder() {
+  const fileMap = new Map();
+  // const files = readFilesFromFolder(MANUAL_PATH);
+  const files = readFilesFromFolderSync(MANUAL_PATH);
+
+
+  files.forEach((file) => {
+    if (!file.startsWith('.')) {
+      const filename = getFileNameWithoutExtension(file);
+
+      hackTogetherSourceByName(file, filename, fileMap);
+    }
+  });
+
+  return fileMap;
+}
+
+function getFileNameWithoutExtension(fileString) {
+  const nameArray = fileString.split('/');
+  let documentName;
+  if (nameArray && nameArray.length > 1) {
+    // If we want to remove additional extensions they need to be included here
+    documentName = nameArray[nameArray.length - 1].replace(/\.(md|html|ts|js)$/, '');
+  }
+
+  return documentName;
+}
+
+function hackTogetherSourceByName(path, keyName, map) {
+  const nameArray = path.split('manual/');
+  const mainSource = "https://github.com/MetaMask/metamask-docs/tree/";
+  let link = `${mainSource}${nameArray[1]}`;
+  map.set(keyName, link);
+}
+
+function readFilesFromFolderSync(folderPath) {
+  const fileNames = [];
+
+
+  function traverseDirectory(currentPath) {
+    const files = fs.readdirSync(currentPath);
+
+    files.forEach((file) => {
+      const filePath = path.join(currentPath, file);
+      const stat = fs.statSync(filePath);
+
+      if (stat.isFile()) {
+        fileNames.push(filePath);
+      } else if (stat.isDirectory()) {
+        traverseDirectory(filePath);
+      }
+    });
+  }
+
+  traverseDirectory(folderPath);
+
+  return fileNames;
 }
 
 export async function loadFromMMDocsHierarchical() {
