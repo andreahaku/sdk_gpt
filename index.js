@@ -27,7 +27,7 @@ async function main() {
     const answer = res.text.trim();
     chatHistory.push(`${question} ${answer}`);
 
-    console.log(colors.bold.green(`Q: ${question}`));
+    console.log(colors.bold.bgGreen(`Q: ${question.toUpperCase()}`));
     console.log(colors.brightWhite(`A: ${answer}\n`));
   }
 }

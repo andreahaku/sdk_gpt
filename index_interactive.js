@@ -6,7 +6,9 @@ import colors from "colors";
 
 async function main() {
   try {
-    const chain = await llmSetup("metamask_zendesk_kb/");
+    const chain = await llmSetup("metamask_dev_docs");
+    // const chain = await llmSetup("metamask_zendesk_kb/");
+    // const chain = await llmSetup("create-react-app/src/");
 
     const rl = readline.createInterface({
       input: process.stdin,
@@ -28,14 +30,17 @@ async function main() {
       }
 
       const res = await chain.call({
-        question: userQuestion,
+        question:
+          userQuestion +
+          "\n Please respond using the very same language as the question I just asked.",
         chat_history: chatHistory,
       });
 
       const answer = res.text.trim();
+
       chatHistory.push(`${userQuestion} ${answer}`);
 
-      console.log(colors.bold.green(`\nQ: ${userQuestion}`));
+      console.log(colors.bold.bgGreen(`\nQ: ${userQuestion}`));
       console.log(colors.brightWhite(`A: ${answer}\n\n`));
     }
 
