@@ -1,6 +1,10 @@
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
-import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
+import {
+  initializeChain,
+  initializeChatHistory,
+  getAnswer,
+} from "./core_functions/shared.js";
 
 dotenv.config();
 

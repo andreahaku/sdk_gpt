@@ -1,6 +1,10 @@
 import express from "express";
 import bodyParser from "body-parser";
-import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
+import {
+  initializeChain,
+  initializeChatHistory,
+  getAnswer,
+} from "./core_functions/shared.js";
 
 const app = express();
 app.use(bodyParser.json());

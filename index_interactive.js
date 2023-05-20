@@ -1,7 +1,11 @@
 import readline from "readline";
 import util from "util";
 import colors from "colors";
-import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
+import {
+  initializeChain,
+  initializeChatHistory,
+  getAnswer,
+} from "./core_functions/shared.js";
 
 async function main() {
   try {
