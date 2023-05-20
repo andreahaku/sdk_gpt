@@ -1,3 +1,8 @@
+import {
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
+} from "langchain/prompts";
 import readline from "readline";
 import util from "util";
 import { model } from "./openAI_model.js";
@@ -7,18 +12,23 @@ import colors from "colors";
 async function main() {
   try {
     const chain = await llmSetup("metamask_dev_docs");
-    // const chain = await llmSetup("metamask_zendesk_kb/");
-    // const chain = await llmSetup("create-react-app/src/");
 
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
 
-    // Use util.promisify to convert rl.question into a function that returns a Promise
     const askQuestion = util.promisify(rl.question).bind(rl);
 
     const chatHistory = [];
+
+    // Create a ChatPromptTemplate with system and human message templates
+    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+      HumanMessagePromptTemplate.fromTemplate("{text}"),
+      SystemMessagePromptTemplate.fromTemplate(
+        "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
+      ),
+    ]);
 
     for (;;) {
       const userQuestion = await askQuestion(
@@ -29,10 +39,14 @@ async function main() {
         break;
       }
 
+      // Format the chatPrompt with the user's question and the topic
+      const formattedPrompt = await chatPrompt.format({
+        topic: "MetaMask Developers documentation",
+        text: userQuestion,
+      });
+
       const res = await chain.call({
-        question:
-          userQuestion +
-          "\n Please respond using the very same language as the question I just asked.",
+        question: formattedPrompt,
         chat_history: chatHistory,
       });
 

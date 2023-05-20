@@ -1,3 +1,8 @@
+import {
+  ChatPromptTemplate,
+  HumanMessagePromptTemplate,
+  SystemMessagePromptTemplate,
+} from "langchain/prompts";
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
 import { model } from "./openAI_model.js";
@@ -7,7 +12,15 @@ dotenv.config();
 
 const { DISCORD_BOT_TOKEN } = process.env;
 
-const chainPromise = await llmSetup("metamask_zendesk_kb/");
+const chainPromise = llmSetup("metamask_zendesk_kb/");
+
+// Create a ChatPromptTemplate with system and human message templates
+const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+  HumanMessagePromptTemplate.fromTemplate("{text}"),
+  SystemMessagePromptTemplate.fromTemplate(
+    "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
+  ),
+]);
 
 const client = new Client({
   intents: [
@@ -62,9 +75,15 @@ client.on("messageCreate", async (message) => {
           // Get the chat history for this user
           const userChatHistory = chatHistory.get(authorId) || [];
 
+          // Format the chatPrompt with the user's question
+          const formattedPrompt = await chatPrompt.format({
+            topic: "MetaMask Zendesk KB",
+            text: question,
+          });
+
           const chain = await chainPromise;
           const response = await chain.call({
-            question,
+            question: formattedPrompt,
             chat_history: userChatHistory,
           });
           const answer = response.text.trim();
