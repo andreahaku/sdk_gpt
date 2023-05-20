@@ -7,13 +7,12 @@ import {
 import { llmSetup } from "./llm_setup.js";
 
 // Create a ChatPromptTemplate with system and human message templates
-const chatPrompt = (text) =>
-  ChatPromptTemplate.fromPromptMessages([
-    HumanMessagePromptTemplate.fromTemplate("{text}"),
-    SystemMessagePromptTemplate.fromTemplate(
-      "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
-    ),
-  ]);
+const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+  HumanMessagePromptTemplate.fromTemplate("{text}"),
+  SystemMessagePromptTemplate.fromTemplate(
+    "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
+  ),
+]);
 
 export const initializeChain = async (knowledgeBasePath) => {
   const chain = await llmSetup(knowledgeBasePath);
