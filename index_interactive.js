@@ -1,17 +1,12 @@
-import {
-  ChatPromptTemplate,
-  HumanMessagePromptTemplate,
-  SystemMessagePromptTemplate,
-} from "langchain/prompts";
 import readline from "readline";
 import util from "util";
-import { model } from "./openAI_model.js";
-import { llmSetup } from "./llm_setup.js";
 import colors from "colors";
+import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
 
 async function main() {
   try {
-    const chain = await llmSetup("metamask_dev_docs");
+    const knowledgeBasePath = "./metamask_dev_docs";
+    const chain = await initializeChain(knowledgeBasePath);
 
     const rl = readline.createInterface({
       input: process.stdin,
@@ -20,15 +15,7 @@ async function main() {
 
     const askQuestion = util.promisify(rl.question).bind(rl);
 
-    const chatHistory = [];
-
-    // Create a ChatPromptTemplate with system and human message templates
-    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
-      HumanMessagePromptTemplate.fromTemplate("{text}"),
-      SystemMessagePromptTemplate.fromTemplate(
-        "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
-      ),
-    ]);
+    const chatHistory = initializeChatHistory();
 
     for (;;) {
       const userQuestion = await askQuestion(
@@ -39,18 +26,8 @@ async function main() {
         break;
       }
 
-      // Format the chatPrompt with the user's question and the topic
-      const formattedPrompt = await chatPrompt.format({
-        topic: "MetaMask Developers documentation",
-        text: userQuestion,
-      });
-
-      const res = await chain.call({
-        question: formattedPrompt,
-        chat_history: chatHistory,
-      });
-
-      const answer = res.text.trim();
+      const topic = "MetaMask Developers documentation";
+      const answer = await getAnswer(chain, chatHistory, topic, userQuestion);
 
       chatHistory.push(`${userQuestion} ${answer}`);
 

@@ -1,8 +1,9 @@
-import { llmSetup } from "./llm_setup.js";
 import colors from "colors";
+import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
 
 async function main() {
-  const chain = await llmSetup("metamask_dev_docs/");
+  const knowledgeBasePath = "./metamask_dev_docs";
+  const chain = await initializeChain(knowledgeBasePath);
 
   const questions = [
     "What is the MetaMask SDK?",
@@ -17,14 +18,11 @@ async function main() {
     "How can you view a NodeJS app example of the MetaMask SDK?",
   ];
 
-  const chatHistory = [];
+  const chatHistory = initializeChatHistory();
 
+  const topic = "MetaMask Developers documentation";
   for (const question of questions) {
-    const res = await chain.call({
-      question,
-      chat_history: chatHistory,
-    });
-    const answer = res.text.trim();
+    const answer = await getAnswer(chain, chatHistory, topic, question);
     chatHistory.push(`${question} ${answer}`);
 
     console.log(colors.bold.bgGreen(`Q: ${question.toUpperCase()}`));

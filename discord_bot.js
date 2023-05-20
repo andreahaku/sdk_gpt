@@ -1,26 +1,10 @@
-import {
-  ChatPromptTemplate,
-  HumanMessagePromptTemplate,
-  SystemMessagePromptTemplate,
-} from "langchain/prompts";
 import { Client, IntentsBitField } from "discord.js";
 import dotenv from "dotenv";
-import { model } from "./openAI_model.js";
-import { llmSetup } from "./llm_setup.js";
+import { initializeChain, initializeChatHistory, getAnswer } from "./shared.js";
 
 dotenv.config();
 
 const { DISCORD_BOT_TOKEN } = process.env;
-
-const chainPromise = llmSetup("metamask_zendesk_kb/");
-
-// Create a ChatPromptTemplate with system and human message templates
-const chatPrompt = ChatPromptTemplate.fromPromptMessages([
-  HumanMessagePromptTemplate.fromTemplate("{text}"),
-  SystemMessagePromptTemplate.fromTemplate(
-    "Make sure you give an extended and detailed answer. Provide code snippets every time it's possible and makes sense to do so. Also, please respond using the very same language as the question. Format your answer as `Markdown`."
-  ),
-]);
 
 const client = new Client({
   intents: [
@@ -31,11 +15,18 @@ const client = new Client({
 });
 
 // Use a Map object to store chat history for each user
-const chatHistory = new Map();
+const chatHistoryMap = new Map();
+let chain;
 
-const sendMessage = (message) => {
+// Initialize the chain when the bot starts
+(async function () {
+  const knowledgeBasePath = "./metamask_zendesk_kb";
+  chain = await initializeChain(knowledgeBasePath);
+})();
+
+const sendMessage = (message, response) => {
   try {
-    message.reply(message);
+    message.reply(response);
   } catch (error) {
     console.log(error);
   }
@@ -49,19 +40,22 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const content = message.content.trim();
+  const authorId = message.author.id;
 
   try {
     // Use switch statement to handle different commands
     switch (content) {
       case "!help":
         sendMessage(
+          message,
           "Type !askMM <your question> to ask a question about the MetaMask SDK."
         );
         break;
 
       case "!about":
         sendMessage(
-          "I'm a bot that can answer questions about the MetaMask SDK."
+          message,
+          "I'm a bot that can answer questions about the MetaMask clients (Extension and Mobile app)."
         );
         break;
 
@@ -69,35 +63,24 @@ client.on("messageCreate", async (message) => {
         if (!content.startsWith("!askMM ")) return;
 
         const question = content.slice(7).trim();
-        const authorId = message.author.id;
 
         try {
           // Get the chat history for this user
-          const userChatHistory = chatHistory.get(authorId) || [];
+          const chatHistory =
+            chatHistoryMap.get(authorId) || initializeChatHistory();
 
-          // Format the chatPrompt with the user's question
-          const formattedPrompt = await chatPrompt.format({
-            topic: "MetaMask Zendesk KB",
-            text: question,
-          });
-
-          const chain = await chainPromise;
-          const response = await chain.call({
-            question: formattedPrompt,
-            chat_history: userChatHistory,
-          });
-          const answer = response.text.trim();
+          const topic = "MetaMask Zendesk KB";
+          const answer = await getAnswer(chain, chatHistory, topic, question);
 
           // Add the question+answer string to the user's chat history
-          chatHistory.set(authorId, [
-            ...userChatHistory,
-            `${question} ${answer}`,
-          ]);
+          chatHistory.push(`${question} ${answer}`);
+          chatHistoryMap.set(authorId, chatHistory);
 
-          sendMessage(answer);
+          sendMessage(message, answer);
         } catch (error) {
           console.error(error);
           sendMessage(
+            message,
             "Oops! Something went wrong. Please try again later or contact the bot developer."
           );
         }
